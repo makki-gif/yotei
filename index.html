@@ -143,11 +143,13 @@
   .day-cell {
     border-right: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    min-height: 90px;
-    padding: 5px;
+    height: 80px;
+    padding: 4px 3px;
     cursor: pointer;
     transition: background .12s;
     position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
   }
   .day-cell:nth-child(7n) { border-right: none; }
   .day-cell:hover { background: #FFF0EE; }
@@ -172,15 +174,22 @@
   .day-cell.sat .day-num { color: #6A9AB0; }
   .day-cell.selected.sun .day-num, .day-cell.selected.sat .day-num { color: #fff; }
 
-  .avail-tags { display: flex; flex-direction: column; gap: 2px; }
+  .avail-tags {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow: hidden;
+    max-height: 52px;
+  }
   .avail-tag {
-    font-size: .66rem;
-    padding: 1px 5px;
+    font-size: .6rem;
+    padding: 1px 4px;
     border-radius: 3px;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-shrink: 0;
   }
 
   /* 登録パネル */
