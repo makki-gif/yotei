@@ -1,0 +1,18 @@
+{
+  "name": "ツナグ予定カレンダー",
+  "short_name": "ツナグ予定",
+  "description": "6人のスケジュール調整カレンダー",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#E8C85A",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

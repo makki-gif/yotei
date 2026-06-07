@@ -3,20 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>予定カレンダー</title>
+<title>ツナグ予定カレンダー</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#5C3A28">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ツナグ予定">
+<link rel="apple-touch-icon" href="./icon.png">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&display=swap');
 
   :root {
-    --cream:   #F4F1ED;
-    --sand:    #E2D1C7;
-    --rose:    #B4A093;
-    --brown:   #8E7B6D;
-    --dark:    #4D3F35;
-    --white:   #FDFCFB;
-    --border:  #E2D1C7;
-    --muted:   #B4A093;
+    --cream:   #FFFFFF;
+    --sand:    #FDEEE9;
+    --rose:    #F5A898;
+    --brown:   #90BDA0;
+    --dark:    #3D3D3D;
+    --white:   #FFFFFF;
+    --border:  #EDE8E5;
+    --muted:   #AAAAAA;
     --radius:  8px;
+    --pink:    #F5A898;
+    --green:   #90BDA0;
+    --yellow:  #E8C85A;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -28,13 +37,14 @@
   }
 
   header {
-    background: var(--dark);
-    color: var(--cream);
+    background: #FFFFFF;
+    color: var(--dark);
     padding: 16px 24px;
     display: flex;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 2px 12px rgba(77,63,53,.18);
+    border-bottom: 2px solid var(--sand);
+    box-shadow: 0 2px 12px rgba(0,0,0,.05);
   }
   header .logo-text {
     font-family: 'Cormorant Garamond', serif;
@@ -42,8 +52,9 @@
     font-weight: 600;
     letter-spacing: .18em;
     text-transform: uppercase;
+    color: #5C3A28;
   }
-  header .subtitle { font-size: .75rem; opacity: .6; margin-left: auto; letter-spacing: .12em; }
+  header .subtitle { font-size: .75rem; color: var(--muted); margin-left: auto; letter-spacing: .12em; }
 
   .container { max-width: 1000px; margin: 0 auto; padding: 20px 16px; }
 
@@ -71,8 +82,8 @@
     color: var(--brown);
     transition: all .15s;
   }
-  .member-btn.active { background: var(--dark); border-color: var(--dark); color: var(--cream); }
-  .member-btn:hover:not(.active) { border-color: var(--brown); color: var(--dark); }
+  .member-btn.active { background: var(--pink); border-color: var(--pink); color: #fff; }
+  .member-btn:hover:not(.active) { border-color: var(--pink); color: var(--dark); }
 
   /* カレンダーナビ */
   .cal-nav {
@@ -114,8 +125,8 @@
   .cal-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: var(--dark);
-    color: var(--cream);
+    background: var(--pink);
+    color: #fff;
   }
   .cal-header div {
     text-align: center;
@@ -139,11 +150,11 @@
     position: relative;
   }
   .day-cell:nth-child(7n) { border-right: none; }
-  .day-cell:hover { background: #F0EAE4; }
-  .day-cell.empty { background: #FAF8F6; cursor: default; }
-  .day-cell.selected { background: #EDE5DF; }
-  .day-cell.selected .day-num { background: var(--dark); color: var(--cream); }
-  .day-cell.today .day-num { border: 1.5px solid var(--dark); color: var(--dark); }
+  .day-cell:hover { background: #FFF0EE; }
+  .day-cell.empty { background: #FAFAFA; cursor: default; }
+  .day-cell.selected { background: #FDEEE9; }
+  .day-cell.selected .day-num { background: var(--pink); color: #fff; }
+  .day-cell.today .day-num { border: 1.5px solid var(--pink); color: var(--pink); }
 
   .day-num {
     display: inline-flex;
@@ -157,9 +168,9 @@
     margin-bottom: 3px;
     color: var(--dark);
   }
-  .day-cell.sun .day-num { color: #9B6B5A; }
-  .day-cell.sat .day-num { color: #7A8FA6; }
-  .day-cell.selected.sun .day-num, .day-cell.selected.sat .day-num { color: var(--cream); }
+  .day-cell.sun .day-num { color: #E07A6A; }
+  .day-cell.sat .day-num { color: #6A9AB0; }
+  .day-cell.selected.sun .day-num, .day-cell.selected.sat .day-num { color: #fff; }
 
   .avail-tags { display: flex; flex-direction: column; gap: 2px; }
   .avail-tag {
@@ -216,11 +227,11 @@
     letter-spacing: .05em;
   }
   .slot-btn:hover { border-color: var(--brown); }
-  .slot-btn.selected { background: var(--dark); color: var(--cream); border-color: var(--dark); }
+  .slot-btn.selected { background: var(--pink); color: #fff; border-color: var(--pink); }
 
   .btn-register {
-    background: var(--dark);
-    color: var(--cream);
+    background: var(--pink);
+    color: #fff;
     border: none;
     border-radius: 6px;
     padding: 10px 26px;
@@ -258,20 +269,20 @@
   .legend-item { display: flex; align-items: center; gap: 5px; }
   .legend-dot { width: 9px; height: 9px; border-radius: 2px; }
 
-  /* メンバーカラー（アースtone） */
-  .m0 { background: #9B6B5A; }
-  .m1 { background: #8E7B6D; }
-  .m2 { background: #7A8FA6; }
-  .m3 { background: #7A9A87; }
-  .m4 { background: #B4A093; }
-  .m5 { background: #4D3F35; }
+  /* メンバーカラー（パステル） */
+  .m0 { background: #F5A898; }
+  .m1 { background: #90BDA0; }
+  .m2 { background: #E8C85A; }
+  .m3 { background: #A0C4D8; }
+  .m4 { background: #C4A8D4; }
+  .m5 { background: #F0A060; }
 
-  .tag-m0 { background: #F5EAE6; color: #7A4A3A; }
-  .tag-m1 { background: #EDE8E5; color: #5C4A3E; }
-  .tag-m2 { background: #E6ECF2; color: #4A6078; }
-  .tag-m3 { background: #E6EDEA; color: #3E6450; }
-  .tag-m4 { background: #F0EAE6; color: #7A6258; }
-  .tag-m5 { background: #E8E3DF; color: #3A2E28; }
+  .tag-m0 { background: #FDE8E5; color: #C05A4A; }
+  .tag-m1 { background: #E5F2EA; color: #3E7A58; }
+  .tag-m2 { background: #FDF5DC; color: #8A7020; }
+  .tag-m3 { background: #E0EEF5; color: #3A6880; }
+  .tag-m4 { background: #EFE8F5; color: #6A4A88; }
+  .tag-m5 { background: #FEEEDD; color: #B05A10; }
 
   .notice {
     font-size: .78rem;
@@ -293,16 +304,16 @@
   /* パスワード画面 */
   #pwScreen {
     position: fixed; inset: 0;
-    background: var(--dark);
+    background: linear-gradient(145deg, #FDE8E5 0%, #E8F5EE 50%, #FDF5DC 100%);
     display: flex; align-items: center; justify-content: center;
     z-index: 9999;
   }
   .pw-box {
-    background: var(--cream);
-    border-radius: 12px;
+    background: #fff;
+    border-radius: 20px;
     padding: 40px 36px;
     text-align: center;
-    box-shadow: 0 12px 48px rgba(0,0,0,.25);
+    box-shadow: 0 8px 40px rgba(0,0,0,.08);
     width: 300px;
   }
   .pw-box .pw-title {
@@ -314,22 +325,22 @@
   .pw-box p { font-size: .78rem; color: var(--muted); margin-bottom: 22px; letter-spacing: .06em; }
   .pw-box input {
     width: 100%; padding: 10px 14px;
-    border: 1.5px solid var(--border); border-radius: 6px;
+    border: 1.5px solid var(--border); border-radius: 8px;
     font-size: .95rem; outline: none; text-align: center;
-    letter-spacing: .12em; background: var(--white);
+    letter-spacing: .12em; background: #FAFAFA;
     color: var(--dark);
     margin-bottom: 12px;
   }
-  .pw-box input:focus { border-color: var(--dark); }
+  .pw-box input:focus { border-color: var(--pink); }
   .pw-box button {
     width: 100%; padding: 10px;
-    background: var(--dark); color: var(--cream);
-    border: none; border-radius: 6px;
+    background: var(--pink); color: #fff;
+    border: none; border-radius: 8px;
     font-size: .88rem; font-weight: 600;
     letter-spacing: .1em; cursor: pointer;
   }
-  .pw-box button:hover { opacity: .82; }
-  .pw-error { color: #9B6B5A; font-size: .8rem; margin-top: 10px; display: none; }
+  .pw-box button:hover { opacity: .88; }
+  .pw-error { color: #E07A6A; font-size: .8rem; margin-top: 10px; display: none; }
 </style>
 </head>
 <body>
