@@ -574,7 +574,7 @@ window.checkPw = function() {
 const MEMBERS = ['つっちー','たえみ','北ちゃん','めぐみ','りえ','makki'];
 const SLOT_ORDER = ['終日','午前','午後','夜'];
 
-let currentMember = 0;
+let currentMember = (() => { try { const s = localStorage.getItem('cal_member'); return s !== null ? parseInt(s) : 0; } catch(e) { return 0; } })();
 let currentYear, currentMonth;
 let selectedDates = new Set();
 let selectedSlots = new Set();
@@ -599,7 +599,7 @@ function init() {
   wrap.style.gap = '6px';
   names.forEach((name, i) => {
     const btn = document.createElement('button');
-    btn.className = 'member-btn' + (i === 0 ? ' active' : '');
+    btn.className = 'member-btn' + (i === currentMember ? ' active' : '');
     btn.dataset.idx = i;
     btn.innerHTML = `<span class="legend-dot m${i}" style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>`;
     const nameSpan = document.createElement('span');
@@ -607,6 +607,7 @@ function init() {
     btn.appendChild(nameSpan);
     btn.addEventListener('click', () => {
       currentMember = i;
+      try { localStorage.setItem('cal_member', i); } catch(e) {}
       document.querySelectorAll('.member-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     });
