@@ -305,6 +305,55 @@
     letter-spacing: .03em;
   }
 
+  /* メモパネル */
+  .memo-panel {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .memo-panel h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase;
+    margin-bottom: 12px; color: var(--dark);
+  }
+  .memo-input-row {
+    display: flex; gap: 8px; margin-bottom: 14px;
+  }
+  .memo-input-row input {
+    flex: 1; padding: 9px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: .88rem; font-family: inherit;
+    outline: none;
+  }
+  .memo-input-row input:focus { border-color: var(--pink); }
+  .memo-input-row button {
+    padding: 9px 16px; border: none; border-radius: 8px;
+    background: var(--green); color: #fff;
+    font-size: .85rem; cursor: pointer; white-space: nowrap;
+  }
+  .memo-list { display: flex; flex-direction: column; gap: 8px; }
+  .memo-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 10px 12px; border-radius: 8px;
+    background: var(--sand);
+  }
+  .memo-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 4px;
+  }
+  .memo-body { flex: 1; }
+  .memo-name { font-size: .72rem; font-weight: 700; margin-bottom: 2px; color: var(--muted); }
+  .memo-text { font-size: .88rem; line-height: 1.5; word-break: break-all; }
+  .memo-del {
+    font-size: .72rem; color: var(--muted);
+    cursor: pointer; padding: 2px 4px; flex-shrink: 0;
+  }
+  .memo-del:hover { color: #E07A6A; }
+  .memo-empty { font-size: .83rem; color: var(--muted); text-align: center; padding: 8px 0; }
+
   /* 削除ボタン（タグ内） */
   .del-entry {
     display: inline-block;
@@ -463,6 +512,16 @@
     <div class="notice">※ 登録済みの予定はカレンダーのタグをクリックで削除できます</div>
   </div>
 
+  <!-- 月メモ -->
+  <div class="memo-panel">
+    <h3>今月のメモ</h3>
+    <div class="memo-input-row">
+      <input type="text" id="memoInput" placeholder="メモを入力..." maxlength="100" onkeydown="if(event.key==='Enter')addMemo()">
+      <button onclick="addMemo()">追加</button>
+    </div>
+    <div class="memo-list" id="memoList"></div>
+  </div>
+
   <!-- 凡例 -->
   <div class="legend" id="legend"></div>
 
@@ -470,7 +529,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
 // ---- Firebase 初期化 ----
 const firebaseConfig = {
@@ -484,6 +543,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const entriesRef = doc(db, 'calendar', 'entries');
+const memosRef = collection(db, 'memos');
+
+let memos = [];
+let currentMonthKey = '';
+
+onSnapshot(query(memosRef, orderBy('ts', 'asc')), (snap) => {
+  memos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderMemos();
+});
 
 // ---- パスワード ----
 const PW = 'tsunagu';
@@ -674,6 +742,56 @@ window.changeMonth = function(delta) {
   selectedDates.clear();
   updatePanel();
   renderCalendar();
+  renderMemos();
+};
+
+// ---- メモ ----
+function getMonthKey() {
+  return `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
+}
+
+function renderMemos() {
+  const key = getMonthKey();
+  const list = document.getElementById('memoList');
+  if(!list) return;
+  const filtered = memos.filter(m => m.month === key);
+  if(filtered.length === 0) {
+    list.innerHTML = '<div class="memo-empty">メモはありません</div>';
+    return;
+  }
+  list.innerHTML = '';
+  filtered.forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'memo-item';
+    const dotColors = ['#F5A898','#90BDA0','#E8C85A','#A0C4D8','#C4A8D4','#F0A060'];
+    item.innerHTML = `
+      <div class="memo-dot" style="background:${dotColors[m.member]}"></div>
+      <div class="memo-body">
+        <div class="memo-name">${MEMBERS[m.member]}</div>
+        <div class="memo-text">${m.text}</div>
+      </div>`;
+    const del = document.createElement('span');
+    del.className = 'memo-del';
+    del.textContent = '✕';
+    del.addEventListener('click', () => {
+      if(confirm('このメモを削除しますか？')) deleteDoc(doc(db, 'memos', m.id));
+    });
+    item.appendChild(del);
+    list.appendChild(item);
+  });
+}
+
+window.addMemo = function() {
+  const input = document.getElementById('memoInput');
+  const text = input.value.trim();
+  if(!text) return;
+  addDoc(memosRef, {
+    month: getMonthKey(),
+    member: currentMember,
+    text,
+    ts: Date.now()
+  });
+  input.value = '';
 };
 
 // ---- 日付選択 ----
