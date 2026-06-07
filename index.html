@@ -28,6 +28,10 @@
     --yellow:  #E8C85A;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
   body {
     font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
     background: var(--cream);
@@ -310,6 +314,45 @@
   }
   .del-entry:hover { opacity: 1; }
 
+  /* 日付詳細モーダル */
+  #dayModal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  #dayModal.hidden { display: none; }
+  .day-modal-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px 20px 20px;
+    width: 100%; max-width: 340px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.15);
+  }
+  .day-modal-title {
+    font-size: 1.1rem; font-weight: 700;
+    margin-bottom: 14px; color: var(--dark);
+  }
+  .day-modal-empty {
+    color: var(--muted); font-size: .85rem; text-align: center; padding: 12px 0;
+  }
+  .day-modal-entry {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; border-radius: 8px; margin-bottom: 6px;
+    font-size: .88rem; font-weight: 600;
+  }
+  .day-modal-entry .del-modal {
+    font-size: .75rem; opacity: .5; cursor: pointer; padding: 2px 4px;
+  }
+  .day-modal-entry .del-modal:hover { opacity: 1; }
+  .day-modal-close {
+    margin-top: 14px; width: 100%;
+    padding: 10px; border: none; border-radius: 10px;
+    background: var(--border); color: var(--dark);
+    font-size: .9rem; cursor: pointer;
+  }
+
   /* パスワード画面 */
   #pwScreen {
     position: fixed; inset: 0;
@@ -355,6 +398,15 @@
 <body>
 
 <!-- パスワード画面 -->
+<!-- 日付詳細モーダル -->
+<div id="dayModal" class="hidden" onclick="closeDayModal(event)">
+  <div class="day-modal-box">
+    <div class="day-modal-title" id="dayModalTitle"></div>
+    <div id="dayModalContent"></div>
+    <button class="day-modal-close" onclick="document.getElementById('dayModal').classList.add('hidden')">閉じる</button>
+  </div>
+</div>
+
 <div id="pwScreen">
   <div class="pw-box">
     <div class="pw-title">Tsunagu</div>
@@ -563,10 +615,54 @@ function renderCalendar() {
       }
     });
     cell.appendChild(tagsEl);
-    cell.addEventListener('click', () => toggleDate(key, cell));
+    cell.addEventListener('click', (e) => {
+      const dayEntries = entries[key] || [];
+      if(dayEntries.length > 0) {
+        openDayModal(key, d, dayEntries);
+      } else {
+        toggleDate(key, cell);
+      }
+    });
     grid.appendChild(cell);
   }
 }
+
+function openDayModal(key, d, dayEntries) {
+  const month = currentMonth + 1;
+  document.getElementById('dayModalTitle').textContent = `${currentYear}年${month}月${d}日`;
+  const content = document.getElementById('dayModalContent');
+  content.innerHTML = '';
+  const seen = {};
+  dayEntries.forEach(e => {
+    const k = `${e.member}_${e.slot}`;
+    if(seen[k]) return;
+    seen[k] = true;
+    const row = document.createElement('div');
+    row.className = `day-modal-entry tag-m${e.member}`;
+    row.innerHTML = `<span>${MEMBERS[e.member]} / ${e.slot}</span>`;
+    const del = document.createElement('span');
+    del.className = 'del-modal';
+    del.textContent = '✕ 削除';
+    del.addEventListener('click', () => {
+      if(confirm(`「${MEMBERS[e.member]} / ${e.slot}」を削除しますか？`)) {
+        removeEntry(key, e.member, e.slot);
+        document.getElementById('dayModal').classList.add('hidden');
+      }
+    });
+    row.appendChild(del);
+    content.appendChild(row);
+  });
+  if(content.children.length === 0) {
+    content.innerHTML = '<div class="day-modal-empty">予定なし</div>';
+  }
+  document.getElementById('dayModal').classList.remove('hidden');
+}
+
+window.closeDayModal = function(e) {
+  if(e.target === document.getElementById('dayModal')) {
+    document.getElementById('dayModal').classList.add('hidden');
+  }
+};
 
 function dateKey(y, m, d) {
   return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
