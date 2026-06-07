@@ -615,14 +615,12 @@ function renderCalendar() {
       }
     });
     cell.appendChild(tagsEl);
-    cell.addEventListener('click', (e) => {
+    tagsEl.addEventListener('click', (e) => {
+      e.stopPropagation();
       const dayEntries = entries[key] || [];
-      if(dayEntries.length > 0) {
-        openDayModal(key, d, dayEntries);
-      } else {
-        toggleDate(key, cell);
-      }
+      if(dayEntries.length > 0) openDayModal(key, d, dayEntries);
     });
+    cell.addEventListener('click', () => toggleDate(key, cell));
     grid.appendChild(cell);
   }
 }
